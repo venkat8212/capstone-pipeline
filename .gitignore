@@ -1,0 +1,20 @@
+# SQLite Database
+database.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# IDEs & System files
+.vscode/
+.idea/
+.gemini/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Project Management & Collaboration System</title>
+    <!-- Import Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- 1. Authentication View -->
+    <div id="auth-view" class="auth-wrapper">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <h2><i class="lucide-shield-check" style="color:var(--accent-indigo);"></i> Enterprise<span>PMS</span></h2>
+            </div>
+            
+            <div class="auth-tabs">
+                <button id="tab-btn-login" class="auth-tab-btn active">Sign In</button>
+                <button id="tab-btn-register" class="auth-tab-btn">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Enterprise Email</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="name@enterprise.com" required value="admin@enterprise.com">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required value="admin123">
+                </div>
+                <button type="submit" class="btn btn-primary mt-4 w-full">Access workspace</button>
+                <div class="auth-footer">
+                    <p style="font-size:0.8rem; color:var(--text-muted);">
+                        Demo Accounts:<br>
+                        Admin: admin@enterprise.com (admin123)<br>
+                        Manager: manager@enterprise.com (manager123)<br>
+                        Developer: dev@enterprise.com (dev123)
+                    </p>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="reg-name">Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Enterprise Email</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="name@enterprise.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-role">Access Role</label>
+                    <select id="reg-role" class="form-control" required>
+                        <option value="employee">Employee</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-teal mt-4 w-full">Create account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Main Workspace Application View -->
+    <div id="app-view" class="app-container" style="display: none;">
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo">
+                    <i class="lucide-layout-grid"></i> Enterprise<span>PMS</span>
+                </a>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#" class="sidebar-item active" data-target="dashboard">
+                        <i class="lucide-home"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="projects">
+                        <i class="lucide-folder-git"></i> Projects
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="tasks">
+                        <i class="lucide-check-square"></i> Tasks Board
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="collaboration">
+                        <i class="lucide-message-square"></i> Collaboration
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="resources">
+                        <i class="lucide-users"></i> Resources
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="reports">
+                        <i class="lucide-bar-chart-3"></i> Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="pipeline">
+                        <i class="lucide-git-branch"></i> CI/CD Pipeline
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="security">
+                        <i class="lucide-shield-alert"></i> Security & profile
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Current User profile drawer -->
+            <div class="sidebar-user">
+                <div id="sidebar-user-avatar" class="user-avatar">?</div>
+                <div class="user-info">
+                    <div id="sidebar-user-name" class="user-name">Loading...</div>
+                    <div id="sidebar-user-role" class="user-role">Role</div>
+                </div>
+                <button class="logout-btn" onclick="logoutUser()" title="Logout session">
+                    <i class="lucide-log-out"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right Main View Area -->
+        <main class="main-wrapper">
+            <!-- Header bar -->
+            <header class="main-header">
+                <div class="header-title">
+                    <span id="header-title-text">Dashboard</span>
+                </div>
+                
+                <div class="header-actions">
+                    <!-- Notification Bell with popup dropdown -->
+                    <div class="notification-container" id="noti-bell-btn">
+                        <i class="lucide-bell notification-bell"></i>
+                        <span id="noti-badge" class="notification-badge" style="display: none;">0</span>
+                        
+                        <!-- Notifications List Dropdown -->
+                        <div id="noti-drop" class="notification-dropdown">
+                            <div class="noti-header">
+                                <span>Recent System Alerts</span>
+                            </div>
+                            <div id="noti-list" class="noti-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Views Switchboard -->
+
+            <!-- View A: Dashboard -->
+            <div id="dashboard-page" class="content-page active">
+                <div class="stat-cards-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Active Projects</h4>
+                            <h2 id="dash-total-projects">0</h2>
+                        </div>
+                        <div class="stat-card-icon blue">
+                            <i class="lucide-briefcase"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Projects Completed</h4>
+                            <h2 id="dash-completed-projects">0</h2>
+                        </div>
+                        <div class="stat-card-icon emerald">
+                            <i class="lucide-clipboard-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Active Backlog Tasks</h4>
+                            <h2 id="dash-active-tasks">0</h2>
+                        </div>
+                        <div class="stat-card-icon amber">
+                            <i class="lucide-alert-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Team Members</h4>
+                            <h2 id="dash-team-count">0</h2>
+                        </div>
+                        <div class="stat-card-icon teal">
+                            <i class="lucide-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reports-layout">
+                    <!-- Projects Progress table card -->
+                    <div class="table-container" style="margin-bottom:0;">
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="font-size:1.1rem;font-weight:600;">Active Projects Performance Tracker</h3>
+                        </div>
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Project Name</th>
+                                    <th>Assigned Lead</th>
+                                    <th>Status</th>
+                                    <th>Completion Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-project-progress-list">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Workload Alerts panel -->
+                    <div class="chart-card" style="min-height:unset;">
+                        <h3 style="margin-bottom:12px;"><i class="lucide-alert-triangle" style="color:var(--color-warning); vertical-align:middle; width:18px;"></i> Employee Workload Alerts</h3>
+                        <ul id="dash-workload-alerts" style="list-style:none; display:flex; flex-direction:column; gap:8px;">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View B: Projects -->
+            <div id="projects-page" class="content-page">
+                <div class="action-bar">
+                    <h3>Project Inventory Workspace</h3>
+                    <button class="btn btn-primary" onclick="openModal('project-modal')">
+                        <i class="lucide-plus"></i> Initialize Project
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Project Name & Details</th>
+                                <th>Project Manager</th>
+                                <th>Status</th>
+                                <th>Completion Progress</th>
+                                <th>Target Deadline</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="project-list-table">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-bar" style="margin-top:40px;">
+                    <h3>Project Timelines (Gantt Schedule Overview)</h3>
+                </div>
+                
+                <div class="gantt-container">
+                    <div class="gantt-chart">
+                        <div id="gantt-sidebar-rows" class="gantt-sidebar">
+                            <!-- Labels populated dynamically -->
+                        </div>
+                        <div class="gantt-body">
+                            <div id="gantt-timeline-header" class="gantt-timeline-header">
+                                <!-- Month headers populated dynamically -->
+                            </div>
+                            <div id="gantt-timeline-rows" class="gantt-timeline-row">
+                                <!-- Horizontal bars populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View C: Tasks Board -->
+            <div id="tasks-page" class="content-page">
+                <div class="action-bar">
+                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <select id="task-filter-project" class="form-control" style="width:200px; padding:8px;" onchange="renderTasks()">
+                            <option value="all">All Projects</option>
+                        </select>
+                        <select id="task-filter-priority" class="form-control" style="width:150px; padding:8px;" onchange="renderTasks()">
+                            <option value="all">All Priorities</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('task-modal')">
+                        <i class="lucide-plus"></i> Allocate Task
+                    </button>
+                </div>
+
+                <!-- Kanban Columns Grid -->
+                <div class="kanban-board">
+                    <!-- Column 1: To Do -->
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <span class="kanban-column-title">
+                                <i class="lucide-list" style="color:var(--accent-indigo); width:18px;"></i> To Do
+                            </span>
+                            <span id="count-todo" class="kanban-card-count">0</span>
+                        </div>
+                        <div id="kanban-todo-wrapper" class="kanban-cards-wrapper" data-status="todo">
+                            <!-- Cards populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Column 2: In Progress -->
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <span class="kanban-column-title">
+                                <i class="lucide-clock" style="color:var(--color-warning); width:18px;"></i> In Progress
+                            </span>
+                            <span id="count-inprogress" class="kanban-card-count">0</span>
+                        </div>
+                        <div id="kanban-inprogress-wrapper" class="kanban-cards-wrapper" data-status="in-progress">
+                            <!-- Cards populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Completed -->
+                    <div class="kanban-column">
+                        <div class="kanban-column-header">
+                            <span class="kanban-column-title">
+                                <i class="lucide-check-circle2" style="color:var(--color-success); width:18px;"></i> Completed
+                            </span>
+                            <span id="count-completed" class="kanban-card-count">0</span>
+                        </div>
+                        <div id="kanban-completed-wrapper" class="kanban-cards-wrapper" data-status="completed">
+                            <!-- Cards populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View D: Collaboration (Chat rooms & File Sharing) -->
+            <div id="collaboration-page" class="content-page">
+                <div class="collab-layout">
+                    <!-- Sidebar project channel switcher -->
+                    <div class="collab-sidebar">
+                        <div class="collab-sidebar-header">
+                            Discussion Rooms
+                        </div>
+                        <div id="collab-chat-rooms" class="collab-room-list">
+                            <!-- Rooms list loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Room chat screen -->
+                    <div class="collab-chat-wrapper">
+                        <div class="chat-header">
+                            <h4 id="collab-chat-title"># Project Discussion</h4>
+                            <button class="btn btn-teal btn-sm" onclick="openModal('document-modal')">
+                                <i class="lucide-file-plus"></i> Share Document
+                            </button>
+                        </div>
+                        
+                        <!-- Messages scroll list -->
+                        <div id="collab-chat-messages" class="chat-messages">
+                            <!-- Message bubbles populated dynamically -->
+                        </div>
+
+                        <!-- User chat inputs -->
+                        <form class="chat-input-area" onsubmit="sendChatMessage(event)">
+                            <input type="text" id="collab-chat-input" class="form-control" style="flex:1;" placeholder="Write message to active room..." required>
+                            <button type="submit" class="btn btn-primary"><i class="lucide-send"></i> Send</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="action-bar" style="margin-top:40px;">
+                    <h3>Shared Library & Documentation Manager</h3>
+                </div>
+                
+                <!-- Shared file download cards grid -->
+                <div id="collab-doc-list" class="doc-grid">
+                    <!-- File cards rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- View E: Resources -->
+            <div id="resources-page" class="content-page">
+                <div class="action-bar">
+                    <h3>Employee Productivity & Allocation Workspace</h3>
+                </div>
+
+                <div class="table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Resource Name & Access Role</th>
+                                <th>Active Workload Status</th>
+                                <th>Availability State</th>
+                                <th>Operational Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resource-list-table">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View F: Reports -->
+            <div id="reports-page" class="content-page">
+                <div class="stat-cards-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Gross Tasks Allocated</h4>
+                            <h2 id="report-total-tasks">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Tasks Completion Rate</h4>
+                            <h2 id="report-completion-rate">0%</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Charts panels -->
+                <div class="reports-layout">
+                    <div class="chart-card">
+                        <h3>Project Resource Completion Progress Bar Chart</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-projects-progress"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Backlog Task State Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-tasks-distribution"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card mt-4" style="min-height:350px;">
+                    <h3>Active Staff Load Distribution Chart</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-resources-workload"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View G: Security & Profile -->
+            <div id="security-page" class="content-page">
+                <!-- User account settings card -->
+                <div class="chart-card mb-4" style="min-height:unset;">
+                    <h3 style="border-bottom:1px solid var(--border-color); padding-bottom:14px;"><i class="lucide-user" style="vertical-align:middle; width:18px;"></i> User profile management</h3>
+                    <form onsubmit="saveProfileSettings(event)" class="auth-form" style="max-width:500px; margin-top:14px;">
+                        <div class="form-group">
+                            <label>Registered Account Email</label>
+                            <span id="profile-email-text" style="color:var(--text-muted); font-weight:600; font-size:0.95rem;">email@email.com</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-name-input">Display Username Name</label>
+                            <input type="text" id="profile-name-input" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-password-input">Update Account Password (leave blank to keep current)</label>
+                            <input type="password" id="profile-password-input" class="form-control" placeholder="Enter new password">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Update account settings</button>
+                    </form>
+                </div>
+
+                <!-- Database backups configuration card -->
+                <div class="chart-card mb-4" style="min-height:unset;">
+                    <h3 style="border-bottom:1px solid var(--border-color); padding-bottom:14px;"><i class="lucide-database" style="vertical-align:middle; width:18px;"></i> Security: Backup and Restore Operations</h3>
+                    <div style="margin-top:14px; display:flex; flex-direction:column; gap:16px;">
+                        <p style="color:var(--text-muted);font-size:0.875rem;line-height:1.5;">
+                            Export system data snapshots including details on active projects, user databases, comments lists, chat boards, and resources workload details. These backups are stored securely as readable JSON formats and can be loaded in back.
+                        </p>
+                        
+                        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+                            <button class="btn btn-teal" onclick="exportDataBackup()"><i class="lucide-download-cloud"></i> Export JSON Backup</button>
+                            
+                            <label class="btn btn-secondary cursor-pointer" style="margin:0;">
+                                <i class="lucide-upload-cloud"></i> Load JSON Backup
+                                <input type="file" id="recovery-file-input" style="display:none;" accept=".json" onchange="importDataBackup(event)">
+                            </label>
+
+                            <button class="btn btn-danger" onclick="resetSystemData()"><i class="lucide-refresh-cw"></i> Wipe Local Database</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Administrators Role Governance List -->
+                <div id="security-admin-panel" class="table-container" style="display:none;">
+                    <div style="padding:20px; border-bottom:1px solid var(--border-color);">
+                        <h3 style="font-size:1.1rem;font-weight:600;"><i class="lucide-shield" style="color:var(--accent-indigo); width:18px; vertical-align:middle;"></i> Administrator Access Gating Panel</h3>
+                    </div>
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Full Username Name</th>
+                                <th>Account Email</th>
+                                <th>Assigned Governance Role</th>
+                                <th>Re-allocate Operational Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="security-users-list">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View H: CI/CD Pipeline -->
+            <div id="pipeline-page" class="content-page">
+                <!-- Pipeline Stats Header -->
+                <div class="stat-cards-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Total Builds</h4>
+                            <h2 id="pipeline-total-builds">0</h2>
+                        </div>
+                        <div class="stat-card-icon blue">
+                            <i class="lucide-cpu"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Success Rate</h4>
+                            <h2 id="pipeline-success-rate">0%</h2>
+                        </div>
+                        <div class="stat-card-icon emerald">
+                            <i class="lucide-check-circle-2"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Avg Duration</h4>
+                            <h2 id="pipeline-avg-duration">0s</h2>
+                        </div>
+                        <div class="stat-card-icon violet">
+                            <i class="lucide-clock"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-info">
+                            <h4>Last Run Status</h4>
+                            <h2 id="pipeline-last-status">-</h2>
+                        </div>
+                        <div class="stat-card-icon amber">
+                            <i class="lucide-activity"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pipeline Core Layout -->
+                <div class="pipeline-main-layout" style="display: grid; grid-template-columns: 1fr 380px; gap: 20px; margin-top: 20px;">
+                    <!-- Left: Pipeline Runs List -->
+                    <div class="chart-card" style="min-height: 450px; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 16px;">
+                            <h3 style="margin:0;"><i class="lucide-list" style="vertical-align: middle; width: 18px; margin-right: 6px;"></i> Build Execution History</h3>
+                            <button id="trigger-pipeline-btn" class="btn btn-primary" onclick="triggerPipelineRun()"><i class="lucide-play" style="width: 14px; height: 14px;"></i> Trigger Build Pipeline</button>
+                        </div>
+                        
+                        <div style="flex: 1; overflow-y: auto; max-height: 380px;">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Run ID</th>
+                                        <th>Target Branch</th>
+                                        <th>Triggered By</th>
+                                        <th>Duration</th>
+                                        <th>Timestamp</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pipeline-runs-list">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Selected Run Details -->
+                    <div class="chart-card" style="min-height: 450px; display: flex; flex-direction: column;">
+                        <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 16px;">
+                            <i class="lucide-sliders" style="vertical-align: middle; width: 18px; margin-right: 6px;"></i> Execution Visualizer
+                        </h3>
+                        
+                        <div id="pipeline-visualizer-container" style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                            <div style="text-align: center; color: var(--text-muted); margin-top: 40px;">
+                                <i class="lucide-info" style="width: 32px; height: 32px; opacity: 0.5; margin-bottom: 10px;"></i>
+                                <p>Select a pipeline run from the list to visualize execution graph and view compilation logs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs console at the bottom -->
+                <div id="pipeline-logs-console-card" class="chart-card mt-4" style="display: none;">
+                    <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="lucide-terminal" style="vertical-align: middle; width: 18px; margin-right: 6px;"></i> Console Execution Log</span>
+                        <span id="pipeline-logs-run-id" style="font-size: 0.8rem; color: var(--text-muted);">Run: #12</span>
+                    </h3>
+                    <pre id="pipeline-logs-terminal" style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; font-family: monospace; font-size: 0.85rem; color: #a4f4a4; height: 200px; overflow-y: auto; white-space: pre-wrap; margin: 0;"></pre>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 3. Modals structure -->
+
+    <!-- Modal A: Add Project -->
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Initialize System Project</h3>
+                <button class="modal-close" onclick="closeModal('project-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveNewProject(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="proj-name-input">Project Name</label>
+                    <input type="text" id="proj-name-input" class="form-control" placeholder="Provide project name..." required>
+                </div>
+                <div class="form-group">
+                    <label for="proj-goal-input">Project Operational Goal</label>
+                    <textarea id="proj-goal-input" class="form-control" style="height:80px; resize:none;" placeholder="Detail specifications and goals..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="proj-manager-select">Assign Project Lead Manager</label>
+                    <select id="proj-manager-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="proj-deadline-input">Target Deadline Date</label>
+                    <input type="date" id="proj-deadline-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="proj-status-select">Current State Status</label>
+                    <select id="proj-status-select" class="form-control">
+                        <option value="todo">To Do</option>
+                        <option value="in-progress" selected>In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('project-modal')">Discard</button>
+                    <button type="submit" class="btn btn-primary">Initialize Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal B: Edit Project -->
+    <div id="edit-project-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Project Configuration</h3>
+                <button class="modal-close" onclick="closeModal('edit-project-modal')">&times;</button>
+            </div>
+            <form onsubmit="updateProject(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="edit-proj-name-input">Project Name</label>
+                    <input type="text" id="edit-proj-name-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-proj-goal-input">Project Operational Goal</label>
+                    <textarea id="edit-proj-goal-input" class="form-control" style="height:80px; resize:none;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-proj-manager-select">Assign Project Lead Manager</label>
+                    <select id="edit-proj-manager-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-proj-deadline-input">Target Deadline Date</label>
+                    <input type="date" id="edit-proj-deadline-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-proj-status-select">Current State Status</label>
+                    <select id="edit-proj-status-select" class="form-control">
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-project-modal')">Discard</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal C: Add Task -->
+    <div id="task-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Allocate Backlog Task</h3>
+                <button class="modal-close" onclick="closeModal('task-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveNewTask(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="task-project-select">Target Project Association</label>
+                    <select id="task-project-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="task-title-input">Task Title</label>
+                    <input type="text" id="task-title-input" class="form-control" placeholder="Provide task title..." required>
+                </div>
+                <div class="form-group">
+                    <label for="task-assignee-select">Assign Employee Resource</label>
+                    <select id="task-assignee-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="task-deadline-input">Target Deadline Date</label>
+                    <input type="date" id="task-deadline-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-priority-select">Priority Urgency Level</label>
+                    <select id="task-priority-select" class="form-control">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-desc-input">Task Detail Specifications</label>
+                    <textarea id="task-desc-input" class="form-control" style="height:80px; resize:none;" placeholder="Detail specifications..."></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Discard</button>
+                    <button type="submit" class="btn btn-primary">Allocate Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal D: Project Milestones Checklists -->
+    <div id="milestones-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <h3 id="milestone-project-name">Project</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Milestones checklist indicators</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('milestones-modal')">&times;</button>
+            </div>
+            
+            <div id="milestone-list-container" style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px; max-height:220px; overflow-y:auto;">
+                <!-- Milestones items checklist rendered here -->
+            </div>
+
+            <!-- Milestone addition form (visible only for admin/managers) -->
+            <form id="add-milestone-form" onsubmit="addMilestone(event)" style="display:flex; gap:10px;">
+                <input type="text" id="new-milestone-text" class="form-control" style="flex:1;" placeholder="Define new milestone item..." required>
+                <button type="submit" class="btn btn-teal">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal E: Task Comments Popup -->
+    <div id="comments-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width:600px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="comments-task-title">Task</h3>
+                    <span id="comments-task-desc" style="font-size:0.8rem; color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">Task Description specifications details...</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('comments-modal')">&times;</button>
+            </div>
+            
+            <div id="comments-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px; max-height:250px; overflow-y:auto; border-top:1px solid var(--border-color); padding-top:12px;">
+                <!-- Comments list dynamically populated -->
+            </div>
+
+            <form onsubmit="saveNewComment(event)" style="display:flex; gap:10px;">
+                <input type="text" id="new-comment-text" class="form-control" style="flex:1;" placeholder="Write a comment..." required>
+                <button type="submit" class="btn btn-primary"><i class="lucide-send" style="width:14px;height:14px;"></i> Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal F: Share Documents -->
+    <div id="document-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Share File in library</h3>
+                <button class="modal-close" onclick="closeModal('document-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveNewDocument(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="doc-project-select">Target Project Association</label>
+                    <select id="doc-project-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="doc-file-input">Select Document File</label>
+                    <input type="file" id="doc-file-input" class="form-control" required>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('document-modal')">Discard</button>
+                    <button type="submit" class="btn btn-primary">Share Document</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal G: Workload Allocation -->
+    <div id="allocate-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <h3>Allocate work load</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Direct allocation for employee resource: <strong id="alloc-resource-name">...</strong></span>
+                </div>
+                <button class="modal-close" onclick="closeModal('allocate-modal')">&times;</button>
+            </div>
+            <form onsubmit="saveAllocation(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="alloc-project-select">Target Project Association</label>
+                    <select id="alloc-project-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="alloc-task-title">Task Title</label>
+                    <input type="text" id="alloc-task-title" class="form-control" placeholder="Provide task title..." required>
+                </div>
+                <div class="form-group">
+                    <label for="alloc-task-deadline">Target Deadline Date</label>
+                    <input type="date" id="alloc-task-deadline" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="alloc-task-priority">Priority Urgency Level</label>
+                    <select id="alloc-task-priority" class="form-control">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('allocate-modal')">Discard</button>
+                    <button type="submit" class="btn btn-primary">Allocate workload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toasts Layer -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Core App logic import -->
+    <script src="app.js"></script>
+
+</body>
+</html>

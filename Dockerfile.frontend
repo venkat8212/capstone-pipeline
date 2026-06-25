@@ -1,0 +1,9 @@
+FROM nginx:alpine
+
+# Copy static frontend files to Nginx default serving directory
+COPY index.html /usr/share/nginx/html/index.html
+COPY app.js /usr/share/nginx/html/app.js
+COPY styles.css /usr/share/nginx/html/styles.css
+
+# Expose port 80
+EXPOSE 80
