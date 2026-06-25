@@ -230,7 +230,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-item:hover, .sidebar-item.active {
-    background-color: rgba(99, 102, 241, 0.1);
+    background-color: rgba(215, 16, 109, 0.866);
     color: var(--text-main);
 }
 
