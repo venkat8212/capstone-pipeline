@@ -13,10 +13,10 @@
     --border-color: #222c40;
     --text-main: #f3f4f6;
     --text-muted: #9ca3af;
-    --accent-indigo: #6366f1;
-    --accent-indigo-hover: #4f46e5;
-    --accent-teal: #14b8a6;
-    --accent-teal-hover: #0d9488;
+    --accent-indigo: #8b5cf6; /* Vibrant violet */
+    --accent-indigo-hover: #7c3aed;
+    --accent-teal: #ec4899; /* Vibrant pink */
+    --accent-teal-hover: #db2777;
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
